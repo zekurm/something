@@ -12,8 +12,8 @@ local Settings = {
 			MaxTwist = { Up = 0, Down = 0, Left = 35, Right = 35 } -- Horizontal yaw constraints (Left/Right limits)
 		},
 		[2] = {
-			MaxLean = { Up = 60, Down = 60, Left = 0, Right = 0 }, -- Increased head limits so it can track freely
-			MaxTwist = { Up = 0, Down = 0, Left = 60, Right = 60 }
+			MaxLean = { Up = 5, Down = 15, Left = 0, Right = 0 },
+			MaxTwist = { Up = 0, Down = 0, Left = 35, Right = 35 }
 		},
 	},
 	Backwards = {
@@ -22,7 +22,7 @@ local Settings = {
 			MaxTwist = { Up = 0, Down = 0, Left = 25, Right = 25 }
 		},
 		[2] = {
-			MaxLean = { Up = 35, Down = 50, Left = 0, Right = 0 },
+			MaxLean = { Up = 10, Down = 25, Left = 0, Right = 0 },
 			MaxTwist = { Up = 0, Down = 0, Left = 35, Right = 35 }
 		},
 	},
@@ -42,12 +42,12 @@ local Settings = {
 			EasingDirection = Enum.EasingDirection.Out 
 		}, -- Lower Spine
 		[2] = { 
-			Speed = 500, 
-			Smoothness = 1, 
-			TweenDuration = .05, 
+			Speed = 135, 
+			Smoothness = 0.8, 
+			TweenDuration = 0.5, 
 			EasingStyle = Enum.EasingStyle.Cubic, 
 			EasingDirection = Enum.EasingDirection.Out 
-		}  -- Neck / Head
+		}, -- Upper Spine
 	},
 
 	-- Features & Offsets
@@ -67,7 +67,12 @@ local trackingTable = {
 
 local motor6Ds = {
 	rootPart:WaitForChild("RootJoint"),           
-	trackingTable[1]:WaitForChild("Neck")   
+	trackingTable[1]:WaitForChild("Neck"), 
+}
+
+local motor6DsOrigins = {
+	motor6Ds[1].C0,           
+	motor6Ds[2].C0, 
 }
 
 -- Calculate total spine height for stable virtual targeting
@@ -256,7 +261,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 			currentY[i] = stepTowards(currentY[i], tweenTargetY, maxJointFrameChange)
 			currentX[i] = currentX[i] + (tweenTargetX - currentX[i]) * config.Smoothness
 			currentY[i] = currentY[i] + (tweenTargetY - currentY[i]) * config.Smoothness
-			motor.Transform = CFrame.fromEulerAnglesYXZ(currentX[i], currentY[i], 0)
+			motor.C0 = motor6DsOrigins[i] * CFrame.fromEulerAnglesYXZ(currentX[i], currentY[i], 0)
 		end
 	end
 end)
